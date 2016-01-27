@@ -15,7 +15,6 @@ $.fn.editableTableWidget = function (options) {
 			showEditor = function (select) {
 				active = element.find('td:focus');
 				if (active.length) {
-					//editor.val(active.text().replace( new RegExp('<br/>', 'g'), '\r\n'))
 					editor.val(active.html().replace( new RegExp('<br>', 'g'), '\n'))
 						.removeClass('error')
 						.show()
