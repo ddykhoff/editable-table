@@ -8,14 +8,15 @@ $.fn.editableTableWidget = function (options) {
 				return opts;
 			},
 			activeOptions = $.extend(buildDefaultOptions(), options),
-			ARROW_LEFT = 37, ARROW_UP = 38, ARROW_RIGHT = 39, ARROW_DOWN = 40, ENTER = 13, ESC = 27, TAB = 9,
+			ARROW_LEFT = 37, ARROW_UP = 38, ARROW_RIGHT = 39, ARROW_DOWN = 40, ENTER = 13, ESC = 27, TAB = 9, SHIFT = 16,
 			element = $(this),
 			editor = activeOptions.editor.css('position', 'absolute').hide().appendTo(element.parent()),
 			active,
 			showEditor = function (select) {
 				active = element.find('td:focus');
 				if (active.length) {
-					editor.val(active.text())
+					//editor.val(active.text().replace( new RegExp('<br/>', 'g'), '\r\n'))
+					editor.val(active.html().replace( new RegExp('<br>', 'g'), '\n'))
 						.removeClass('error')
 						.show()
 						.offset(active.offset())
@@ -29,7 +30,7 @@ $.fn.editableTableWidget = function (options) {
 				}
 			},
 			setActiveText = function () {
-				var text = editor.val(),
+				var text = editor.val().replace( new RegExp('\n', 'g'), '<br>'),
 					evt = $.Event('change'),
 					originalContent;
 				if (active.text() === text || editor.hasClass('error')) {
@@ -57,12 +58,17 @@ $.fn.editableTableWidget = function (options) {
 			setActiveText();
 			editor.hide();
 		}).keydown(function (e) {
+			if (e.which === SHIFT) {
+				return;
+			}
 			if (e.which === ENTER) {
-				setActiveText();
-				editor.hide();
-				active.focus();
-				e.preventDefault();
-				e.stopPropagation();
+				if (!e.shiftKey) {
+					setActiveText();
+					editor.hide();
+					active.focus();
+					e.preventDefault();
+					e.stopPropagation();
+				}
 			} else if (e.which === ESC) {
 				editor.val(active.text());
 				e.preventDefault();
@@ -97,7 +103,9 @@ $.fn.editableTableWidget = function (options) {
 			if (possibleMove.length > 0) {
 				possibleMove.focus();
 			} else if (e.which === ENTER) {
-				showEditor(false);
+				if (!e.shiftKey) {
+					showEditor(false);
+				}
 			} else if (e.which === 17 || e.which === 91 || e.which === 93) {
 				showEditor(true);
 				prevent = false;
@@ -128,4 +136,3 @@ $.fn.editableTableWidget.defaultOptions = {
 					  'border', 'border-top', 'border-bottom', 'border-left', 'border-right'],
 	editor: $('<input>')
 };
-
